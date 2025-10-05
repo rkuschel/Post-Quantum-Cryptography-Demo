@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Post-Quantum Cryptography Demo</h1>
+<form method="POST">
+    <div class="form-group">
+        <label>Lattice Dimension (n):</label>
+        <input type="number" name="n" value="{{ n }}" min="2" max="5">
+    </div>
+    <div class="form-group">
+        <label>Modulus (q):</label>
+        <input type="number" name="q" value="{{ q }}" min="5" max="100">
+    </div>
+    <div class="form-group">
+        <label>Noise Scale:</label>
+        <input type="number" name="noise_scale" value="{{ noise_scale }}" step="0.1" min="0.1" max="5.0">
+    </div>
+    <div class="form-group">
+        <label>Message:</label>
+        <input type="text" name="message" value="{{ message }}">
+    </div>
+    <button type="submit">Run Demo</button>
+</form>
+
+<div class="result">
+    <h2>Results</h2>
+    <p><strong>Shared Secret (Alice):</strong> {{ ss_alice }}</p>
+    <p><strong>Shared Secret (Bob):</strong> {{ ss_bob }}</p>
+    <p><strong>Success:</strong> {{ 'Yes' if success else 'No' }}</p>
+    <p><strong>Ciphertext (hex):</strong> {{ ciphertext }}</p>
+    <p><strong>Decrypted:</strong> {{ decrypted }}</p>
+</div>
+
+<div class="images">
+    <div>
+        <h3>Lattice Visualization</h3>
+        <img src="{{ url_for('static', filename='lattice.png') }}" alt="Lattice" id="latticeImg">
+    </div>
+    <div>
+        <h3>Handshake Flow</h3>
+        <img src="{{ url_for('static', filename='handshake.png') }}" alt="Handshake" id="handshakeImg">
+    </div>
+    <div>
+        <h3>Cryptographic Comparison</h3>
+        <img src="{{ url_for('static', filename='cryptograph.png') }}" alt="Cryptograph" id="cryptographImg">
+    </div>
+</div>
+{% endblock %}
