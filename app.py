@@ -103,6 +103,79 @@ def index():
         except UnicodeDecodeError:
             decrypted = "Decryption failed (invalid UTF-8 sequence)"
 
+    # Generate dynamic explanation with user inputs and calculations
+    explanation_content = f"""
+    <h2>How Lattice Cryptography Works with Your Numbers</h2>
+<p>
+Think of this like a 3D treasure hunt where you’re hiding a secret path from quantum computers!  
+You chose <code>n={n}</code>, <code>q={q}</code>, and <code>noise scale={noise_scale}</code>.  
+Here’s how it all comes together—step by step, just like assembling a puzzle with the diagrams!
+</p>
+
+<ol>
+    <li><strong>Your Playground Size (<code>n={n}</code>)</strong><br>
+    The lattice is a grid with <code>{n}</code> dimensions, like a 3D jungle gym of points.  
+    Each direction is defined by a basis vector (B₁, B₂, B₃, …).  
+    The diagram shows these stretching out to form your mathematical playground!</li>
+
+    <li><strong>Your Secret Path (<code>s</code>)</strong><br>
+    Your secret vector is <code>s = {s.flatten().tolist()}</code>, a list of <code>{n}</code> numbers.  
+    It’s your hidden route through the lattice—marked as the “Clean Point” in the diagram.</li>
+
+    <li><strong>The Public Map (<code>A</code>)</strong><br>
+    You publish a matrix <code>A</code> of size <code>{n}×{n}</code>:  
+    <pre>{np.array2string(A, separator=', ')}</pre>
+    When you multiply it by your secret vector (<code>A @ s</code>), you get a clean lattice point.  
+    The “Clean Point” in the visual corresponds to this product!</li>
+
+    <li><strong>Wrapping Numbers (<code>q={q}</code>)</strong><br>
+    Everything happens modulo <code>{q}</code>, which means numbers “wrap around” after hitting <code>{q}</code>.  
+    It’s like a number clock that resets every <code>{q}</code> ticks.  
+    So we compute <code>(A @ s) mod {q}</code> to keep all coordinates within range.</li>
+
+    <li><strong>Adding Fog (Noise)</strong><br>
+    We introduce a small random “noise” vector <code>e</code> drawn from a normal distribution:  
+    <code>e = {np.random.normal(0, noise_scale, size=(n, 1)).flatten().tolist()}</code>  
+    This noise, scaled by <code>{noise_scale}</code>, makes the result fuzzy—shown as the black arrow shifting the clean point to the “Noisy Point.”</li>
+
+    <li><strong>Your Clue (<code>b</code>)</strong><br>
+    Now we combine the clean point and noise:  
+    <code>b = (A * s + e) mod {q} = {b.flatten().tolist()}</code>  
+    This becomes your encrypted clue sent to Bob.  
+    In the diagram, this is the noisy point floating near your secret!</li>
+
+    <li><strong>Bob’s Map (<code>u</code>)</strong><br>
+    Bob picks his own random vector <code>r</code> and computes:  
+    <code>u = (Aᵀ * r + e₁) mod {q} = {u.flatten().tolist()}</code>  
+    The chart labeled “Vector u” shows this as vertical bars—Bob’s version of your clue.</li>
+
+    <li><strong>Alice’s Output (<code>v</code>)</strong><br>
+    Using Bob’s <code>r</code>, Alice computes her shared value:  
+    <code>v = (bᵀ * r + e₂) mod {q} = {v}</code>  
+    This produces her half of the shared secret, visualized in the “v vs v” plot.</li>
+
+    <li><strong>Bob’s Guess (<code>v′</code>)</strong><br>
+    Bob uses his knowledge of <code>u</code> and your secret <code>s</code> to estimate:  
+    <code>v′ = (uᵀ * s) mod {q} = {v_prime}</code>  
+    The diagram compares <code>v</code> and <code>v′</code>—if they’re close, the secret matches despite the noise!</li>
+
+    <li><strong>Shared Secret Codes</strong><br>
+    Both sides derive cryptographic keys (<code>ss_alice</code> and <code>ss_bob</code>) from <code>u</code> and <code>v</code> (or <code>v′</code>).  
+    If it says “<em>Success: Yes</em>,” that means their secrets align—the system works!</li>
+
+    <li><strong>Locked Message (Ciphertext)</strong><br>
+    Finally, Alice encrypts your message <code>'{message}'</code> into ciphertext:  
+    <code>{ciphertext.hex()}</code>.  
+    If Bob’s derived code matches, he decrypts it back to <code>'{decrypted}'</code>—your hidden treasure revealed!</li>
+    </ol>
+
+    <p>
+    So this whole process is like a noisy treasure map:  
+    quantum computers get lost in the fog, but Bob—using the right math—finds the path.  
+    Try adjusting <code>n</code>, <code>q</code>, or <code>noise_scale</code> to see how the lattice shifts in your diagrams!
+    </p>
+    """
+
     # Plot lattice (increased size with corrected shapes)
     fig = plt.figure(figsize=(12, 9))
     ax = fig.add_subplot(111, projection='3d')
@@ -160,7 +233,7 @@ def index():
     return render_template('index.html', n=n, q=q, noise_scale=noise_scale, message=message,
                            ss_alice=ss_alice.hex(), ss_bob=ss_bob.hex(),
                            success=success, ciphertext=ciphertext.hex(), decrypted=decrypted,
-                           readme_content=readme_content, quantum_content=quantum_content, about_content=about_content)
+                           readme_content=readme_content, quantum_content=quantum_content, about_content=about_content, explanation_content=explanation_content)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
