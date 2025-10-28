@@ -236,4 +236,5 @@ Here’s how it all comes together—step by step, just like assembling a puzzle
                            readme_content=readme_content, quantum_content=quantum_content, about_content=about_content, explanation_content=explanation_content)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    from waitress import serve
+    serve(app,host='0.0.0.0',port=5000)
